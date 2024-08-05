@@ -12,8 +12,8 @@ import { useState } from "react";
 export const HeroSection = () => {
   let [loggedIn,changeLogIn] = useState(false)
   const supabase = createClient()
-  const p = supabase.auth.getUser().then((e)=>{if (e.data){changeLogIn(true)}})
-  console.log()
+  const p = supabase.auth.getUser().then((e)=>{if (e.data.user){changeLogIn(true);console.log(e)}})
+  // console.log(p)
   const { theme } = useTheme();
   return (
     <section className="container w-full">

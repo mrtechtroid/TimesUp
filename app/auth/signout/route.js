@@ -19,3 +19,21 @@ export async function POST(req) {
     status: 302,
   })
 }
+export async function GET(req) {
+  const supabase = createClient()
+
+  // Check if a user's logged in
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (user) {
+    await supabase.auth.signOut()
+  }
+
+  revalidatePath('/', 'layout')
+
+  return NextResponse.redirect(new URL('/login', req.url), {
+    status: 302,
+  })
+}

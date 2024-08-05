@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { headers } from "next/headers";
-import { useState } from "react";
-// import { createClient } from "@/utils/supabase/server";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 import { redirect,useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"
 import RetroGrid from "@/components/magicui/retro-grid";
@@ -19,15 +19,35 @@ import { Label } from "@/components/ui/label"
 import Ripple from "@/components/magicui/ripple";
 
 
+
 export default function Join(){
     const Router = useRouter()
+    const supabase = createClient()
     let [code,setCode] = useState(12345678)
-    const join_match = function(code:any){
-        console.log(code)
-        if (typeof window !== 'undefined') {
-            Router.push("/match/"+code)
-        }
-    }
+    let [user,setUser] = useState({})
+    useEffect(() => {
+      supabase.auth.getUser().then((e)=>{
+        setUser(e?.data?.user)
+      })
+    },[])
+    const join_match = function(code){
+      console.log(code)
+      console.log(user)
+      if (typeof window !== 'undefined') {
+          supabase.from('quiz_instance').select("*").eq("id",code).then((e)=>{
+              if (!e.error){
+                fetch('/api/add_user_quiz_instance', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({quiz_instance:code,name: user?.user_metadata.name, uuid: user?.id, email: user?.email}),
+                })
+              }
+          })
+          Router.push("/play/"+code)
+      }
+  }
     return <>
     <div className="relative flex h-[100vh] w-[100vw] flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
     <Card className="mx-auto max-w-sm z-10 bg-transparent border-none">
