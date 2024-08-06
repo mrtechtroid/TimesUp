@@ -506,7 +506,7 @@ const editQuiz = () => {
               />
               Type Answer
             </Label>
-            <Label className = "text-base">
+            {/* <Label className = "text-base">
               <input
                 type="radio"
                 value="leaderboard"
@@ -514,7 +514,7 @@ const editQuiz = () => {
                 onChange={() => handleTypeChange(pageIndex, 'leaderboard')}
               />
               Leaderboard
-            </Label>
+            </Label> */}
             <Textarea
               placeholder="Enter question"
               value={page.question}

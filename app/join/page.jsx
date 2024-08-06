@@ -20,7 +20,7 @@ import Ripple from "@/components/magicui/ripple";
 
 
 
-export default function Join(){
+export default function Join({searchParams,}){
     const Router = useRouter()
     const supabase = createClient()
     let [code,setCode] = useState(12345678)
@@ -65,6 +65,7 @@ export default function Join(){
               name = "joincode"
               type="number"
               placeholder="12345678"
+              value={searchParams.code}
               required
               onChange={e => setCode(Number(e.target.value))}
             />

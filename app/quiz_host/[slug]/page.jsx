@@ -1,11 +1,12 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   CircleUser,
   DeleteIcon,
+  Flag,
   Menu,
   MoveDown,
   MoveDownIcon,
@@ -59,17 +60,44 @@ import DotPattern from "@/components/magicui/dot-pattern";
 import QRCode from "react-qr-code";
 import AnimatedCircularProgressBar from "@/components/magicui/animated-circular-progress-bar";
 import { Moon, Sun } from "lucide-react";
+function CrownIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      // fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
+      <path d="M5 21h14" />
+    </svg>
+  )
+}
 const Timer = ({ seconds, onComplete }) => {
   // initialize timeLeft with the seconds prop
   const [timeLeft, setTimeLeft] = useState(seconds);
-
   useEffect(() => {
     // exit early when we reach 0
-    if (timeLeft < 0) {
-      onComplete();
-      return;
+    async function ge_(){
+      if (timeLeft < 0) {
+        let r = onComplete();
+        let t = 0;
+        while (t<5){
+          await setTimeout(3000);
+          onComplete(t+1);
+          t++
+          console.log(t)
+        }
+        return;
     }
-
+    }
+    ge_();
     // save intervalId to clear the interval when the
     // component re-renders
     const intervalId = setInterval(() => {
@@ -87,13 +115,70 @@ const Timer = ({ seconds, onComplete }) => {
       <AnimatedCircularProgressBar
         max={Math.ceil(seconds)}
         min={0}
-        value={Math.ceil(timeLeft)}
+        value={Math.ceil(timeLeft)<0?-1:Math.ceil(timeLeft)}
         gaugePrimaryColor="rgb(79 70 229)"
         gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
       />
     </div>
   );
 };
+const Leaderboard = (leaderboard) => {
+  // if (leaderboard.length ==0){
+    leaderboard = [
+      {name:"Tom Chen",points:100},
+      {name:"John Doe",points:95},
+      {name:"Jane Smith",points:85},
+      {name:"Bob Johnson",points:75},
+      {name:"Sarah Lee",points:65},
+    ];
+  // }
+  return (<div>
+    <Card className="w-[50vw] max-w-md">
+    <CardContent className="grid gap-4 h-[400px] overflow-y-scroll p-4">
+        {leaderboard.length>=1 && 
+        <div className="flex items-center justify-between h-[40px]">
+        <div className="flex items-center gap-2">
+          <CrownIcon className="h-8 w-8 text-primary" fill={"#00ff00"}/>
+          <div className="text-sm font-medium">1st Place</div>
+          <div className="text-muted-foreground">{leaderboard[0].name}</div>
+        </div>
+        <div className="text-sm font-medium">{leaderboard[0].points}</div>
+      </div>
+        }
+        {leaderboard.length>=2 && 
+        <div className="flex items-center justify-between h-[40px]">
+        <div className="flex items-center gap-2">
+          <CrownIcon className="h-8 w-8 text-primary" fill={"#ff0000"}/>
+          <div className="text-sm font-medium">2nd Place</div>
+          <div className="text-muted-foreground">{leaderboard[1].name}</div>
+        </div>
+        <div className="text-sm font-medium">{leaderboard[1].points}</div>
+      </div>
+        }
+        {leaderboard.length>=3 && 
+        <div className="flex items-center justify-between h-[40px]">
+        <div className="flex items-center gap-2">
+          <CrownIcon className="h-8 w-8 text-primary" fill={"#0000ff"}/>
+          <div className="text-sm font-medium">3rd Place</div>
+          <div className="text-muted-foreground">{leaderboard[2].name}</div>
+        </div>
+        <div className="text-sm font-medium">{leaderboard[2].points}</div>
+      </div>
+        }
+        {leaderboard.length>=4 && leaderboard.slice(3).map((item,index)=>{
+          return (<div className="flex items-center justify-between h-[40px]">
+            <div className="flex items-center gap-2">
+              <CrownIcon className="h-8 w-8 text-primary" fill={"transparent"} visibility={"hidden"} />
+              <div className="text-sm font-medium">{index+4}th Place</div>
+              <div className="text-muted-foreground">{item.name}</div>
+            </div>
+            <div className="text-sm font-medium">{item.points}</div>
+          </div>)
+        })}
+    </CardContent>
+  </Card>
+  </div>);
+}
 const hostQuiz = () => {
   const [quiz, setQuiz] = useState({});
   const [quiz_instance, setQuiz_instance] = useState([]);
@@ -101,10 +186,14 @@ const hostQuiz = () => {
   const { slug } = useParams();
   const [beforeshowtimer, setBeforeshowtimer] = useState(false);
   const [questionshowtimer, setQuestionshowtimer] = useState(false);
+  const [loaded, setLoaded] = useState(3);
   const quiz_id = slug;
   const router = useRouter();
   const supabase = createClient();
   // const { theme, setTheme } = useTheme();
+  useEffect(() => {
+    setLoaded(0);
+  },[])
   function isEmpty(obj) {
     return Object.keys(obj).length === 0;
   }
@@ -116,6 +205,7 @@ const hostQuiz = () => {
       }
     });
   }, []);
+  
   useEffect(() => {
     async function getQuizInstance() {
       let { data, error } = await supabase
@@ -140,6 +230,7 @@ const hostQuiz = () => {
         .subscribe();
     }
     getQuizInstance();
+    setLoaded(loaded+1);
   }, []);
   useEffect(() => {
     async function getQuizResponses() {
@@ -165,6 +256,7 @@ const hostQuiz = () => {
         .subscribe();
     }
     getQuizResponses();
+    setLoaded(loaded+1);
   }, []);
   useEffect(() => {
     if (quiz_instance == undefined || quiz_instance?.length == 0) {
@@ -178,15 +270,29 @@ const hostQuiz = () => {
       setQuiz(data[0] || {});
     }
     getQuiz();
+    setLoaded(loaded+1);
   }, [quiz_instance]);
   useEffect(() => {
-    console.log(quiz, quiz_instance, quiz_response);
-  }, [quiz, quiz_instance, quiz_response]);
+    console.log(quiz, quiz_instance, quiz_response,loaded);
+  }, [quiz, quiz_instance, quiz_response,loaded]);
   const startQuiz = async () => {
     let { data, error } = await supabase
       .from("quiz_instance")
-      .update({ status: "started", current_page: 0 })
+      .update({ status: "started", current_page: 0,quiz_title:quiz.title,total_pages:quiz.pages.length })
       .eq("id", quiz_instance.id);
+  };
+  const nextQuestion = async () => {
+    if (quiz_instance.current_page == quiz?.pages?.length-1){
+      let { data, error } = await supabase
+      .from("quiz_instance")
+      .update({ status: "finished",})
+      .eq("id", quiz_instance.id);
+    }else{
+    let { data, error } = await supabase
+      .from("quiz_instance")
+      .update({ status: "started", current_page: quiz_instance.current_page+1 })
+      .eq("id", quiz_instance.id);
+    }
   };
   const startTimer = async () => {
     let { data, error } = await supabase
@@ -196,14 +302,14 @@ const hostQuiz = () => {
         page: {
           ...quiz.pages[quiz_instance.current_page],
           displayOn: Date.now() + 5000,
-          correct_answer:[]
+          correctAnswers:[]
         },
       })
       .eq("id", quiz_instance.id);
     setBeforeshowtimer(true);
     setQuestionshowtimer(false);
   };
-  const showQuestion = async () => {
+  const showQuestion = async (stack) => {
     // let {data,error} = await supabase.from('quiz_instance').update({status:"question",current_page:quiz_instance.current_page+1}).eq("id",quiz_instance.id);
     setBeforeshowtimer(false);
     setQuestionshowtimer(true);
@@ -212,17 +318,18 @@ const hostQuiz = () => {
     if (stack == undefined){
       stack = 0;
     }
-    console.log(quiz)
+    // console.log(quiz)
     
-    if (isEmpty(quiz) && stack < 5){
-      return setTimeout(function(){showQuestionResponses(stack+1)},3000);
+    if (isEmpty(quiz)){
+      return -1;
     }
     setBeforeshowtimer(false);
     setQuestionshowtimer(false);
     let { data, error } = await supabase
       .from("quiz_instance")
-      .update({ status: "show_answer",correct_answer:quiz?.pages[quiz_instance.current_page].correct_answer })
+      .update({ status: "show_answer",page:{...quiz?.pages[quiz_instance.current_page]}})
       .eq("id", quiz_instance.id);
+    
   };
   return (
     <>   
@@ -256,7 +363,7 @@ const hostQuiz = () => {
             <div className="flex items-center space-x-2 flex-col">
               <QRCode
                 size={256}
-                value={"https://timesup.mtt.one/join/" + quiz_id}
+                value={"https://timesup.mtt.one/join/?code=" + quiz_id}
               />
               <div className="flex flex-row gap-2">
                 <Input
@@ -280,7 +387,36 @@ const hostQuiz = () => {
           </DialogContent>
         </Dialog>
 
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="fixed top-4 left-4 z-10 rounded-full"
+            >
+              <Flag className="text-primary" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+              <DialogTitle>Leaderboard</DialogTitle>
+              <DialogDescription>
+                who's at the top?
+              </DialogDescription>
+            </DialogHeader>
+            <Leaderboard leaderboard={quiz_instance.leaderboard}></Leaderboard>
+            <DialogFooter className="sm:justify-start">
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Close
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <DotPattern className="[mask-image:radial-gradient(300px_circle_at_center,white,transparent)] z-0" />
+        {loaded>=3 && <>
         {quiz_instance?.status == "not_started" && (
           <>
             <div className="max-w-screen-md mx-auto text-center text-2xl md:text-6xl font-bold m-6">
@@ -301,6 +437,17 @@ const hostQuiz = () => {
               </h1>
             </div>
             <Button onClick={startTimer}>Start Timer</Button>
+          </>
+        )}
+        {quiz_instance?.status == "finished" && (
+          <>
+            <div className="max-w-screen-md mx-auto text-center text-2xl md:text-6xl font-bold m-6">
+              <h1>
+                Quiz Ended!
+              </h1>
+            </div>
+            <span className="text-center text-muted-foreground text-lg">Leaderboard</span>
+            <Leaderboard leaderboard={quiz_instance.leaderboard}></Leaderboard>
           </>
         )}
         {quiz_instance?.status == "display_q" && beforeshowtimer == true && (
@@ -329,12 +476,18 @@ const hostQuiz = () => {
                       </button>
                     </div>
                   ))}
-                {quiz_instance.page.type == "select_answer" && (
+                </div>
+                {quiz_instance.page.type == "type_answer" && (
                   <>
                     <Input className="text-xl center-x" placeholder="Answer" disabled />
                   </>
                 )}
-              </div>
+                {quiz_instance.page.type == "leaderboard" && (
+                  <>
+                    <Leaderboard leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
+                  </>
+                )}
+              
             </div>
             <div className="fixed center-y right-4">
               <Timer
@@ -355,39 +508,36 @@ const hostQuiz = () => {
             <div className="max-w-screen-md mx-auto text-center text-xl md:text-4xl font-bold m-6">
               <h1>{quiz_instance.page.question}</h1>
               <div className="grid grid-cols-2 gap-4">
-                {quiz_instance.page.type == "select_answer" &&
+                {quiz_instance?.page?.type == "select_answer" &&
                   quiz_instance.page.options.map((option, optionIndex) => (
                     <div key={optionIndex}>
                       <button
                         key={optionIndex}
-                        className={(quiz_instance?.page?.correct_answer?.includes(optionIndex)?"bg-green-400":"bg-card-foreground")+"text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"}
+                        style={{backgroundColor:(quiz_instance?.page?.correctAnswers?.includes(optionIndex)?"green":"")}}
+                        className={"bg-card-foreground text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"}
                         //   onClick={() => handleAnswer(index)}
                       >
                         {option}
                       </button>
                     </div>
                   ))}
-                {quiz_instance.page.type == "type_answer" && (
+              </div>
+              {quiz_instance?.page?.type == "type_answer" && (
                   <>
-                    <Input className="text-xl" placeholder="Answer" value = {quiz_instance?.page?.correct_answer?.toString()} disabled />
+                    <div className="flex flex-col items-center justify-center">
+                      <Input className="text-xl border-white" placeholder="Answer" value = {quiz_instance?.page?.correct_answer?.toString()} disabled />
+                    </div>
                   </>
                 )}
-              </div>
+                {quiz_instance.page.type == "leaderboard" && (
+                  <>
+                    <Leaderboard leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
+                  </>
+                )}
             </div>
-            <div className="fixed center-y right-4">
-              <Timer
-                seconds={
-                  (quiz_instance.page.displayOn -
-                    Date.now() +
-                    quiz_instance.page.timeLimit * 1000) /
-                  1000
-                }
-                onComplete={showQuestionResponses}
-                className="fixed center-y z-10 rounded-full"
-              />
-            </div>
+            <Button onClick={nextQuestion}>Next Question</Button>
           </>
-        )}
+        )}</>}
       </div>
     </>
   );

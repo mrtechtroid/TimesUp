@@ -1,0 +1,11 @@
+create
+or replace function public.add_response_to_quiz_instance (
+  p_name text,
+  p_teamname text,
+  p_response text,
+  p_qIndex bigint,
+  p_quiz_instance_id bigint
+) returns void language plpgsql as $$ BEGIN IF (((SELECT current_page from quiz_instance where id = p_quiz_instance_id) = p_qIndex) AND ((SELECT status from quiz_instance where id = p_quiz_instance_id)='display_q')) THEN UPDATE quiz_instance_responses SET responses = responses || to_json(json_build_object('name', p_name,'q_id',p_qIndex, 'teamname', p_teamname, 'response', p_response, 'timestamp', now(),'used',false)) WHERE id = p_quiz_instance_id; END IF; END; $$;
+
+select
+  "add_response_to_quiz_instance" ('John Doe', 'Team A', '0', 3, 6);
