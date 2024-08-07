@@ -122,19 +122,23 @@ const Timer = ({ seconds, onComplete }) => {
     </div>
   );
 };
-const Leaderboard = (leaderboard) => {
+const Leaderboard = ({leaderboard}) => {
+  if (leaderboard==undefined){
+    return
+  }
+  leaderboard = leaderboard.sort((a,b)=>b.points-a.points);
   // if (leaderboard.length ==0){
-    leaderboard = [
-      {name:"Tom Chen",points:100},
-      {name:"John Doe",points:95},
-      {name:"Jane Smith",points:85},
-      {name:"Bob Johnson",points:75},
-      {name:"Sarah Lee",points:65},
-    ];
+    // leaderboard = [
+    //   {name:"Tom Chen",points:100},
+    //   {name:"John Doe",points:95},
+    //   {name:"Jane Smith",points:85},
+    //   {name:"Bob Johnson",points:75},
+    //   {name:"Sarah Lee",points:65},
+    // ];
   // }
   return (<div>
     <Card className="w-[50vw] max-w-md">
-    <CardContent className="grid gap-4 h-[400px] overflow-y-scroll p-4">
+    <CardContent className="flex flex-col gap-4 h-[400px] overflow-y-scroll p-4">
         {leaderboard.length>=1 && 
         <div className="flex items-center justify-between h-[40px]">
         <div className="flex items-center gap-2">
@@ -166,7 +170,7 @@ const Leaderboard = (leaderboard) => {
       </div>
         }
         {leaderboard.length>=4 && leaderboard.slice(3).map((item,index)=>{
-          return (<div className="flex items-center justify-between h-[40px]">
+          return (<div className="flex items-center justify-between h-[40px]" key={index}>
             <div className="flex items-center gap-2">
               <CrownIcon className="h-8 w-8 text-primary" fill={"transparent"} visibility={"hidden"} />
               <div className="text-sm font-medium">{index+4}th Place</div>
@@ -314,7 +318,56 @@ const hostQuiz = () => {
     setBeforeshowtimer(false);
     setQuestionshowtimer(true);
   };
+  useEffect(() => {
+    if (!isEmpty(quiz_instance) && !isEmpty(quiz_response)&& quiz_response?.responses.filter(item=>item.used==false).length != 0){
+      updateLeaderboard();
+    }
+  },[quiz_response,quiz_instance]);
+  const updateLeaderboard = async () => {
+    const inLeaderboard = (name) => {
+      return quiz_instance.leaderboard.filter(item=>item.name==name).length != 0;
+    }
+    if (isEmpty(quiz)||isEmpty(quiz_instance)||isEmpty(quiz_response)){
+      return;
+    }
+    let responses = quiz_response.responses;
+    let leaderboard = quiz_instance.leaderboard;
+    for (let i = 0;i<responses.length;i++){
+      if (responses[i].used == false){
+        let time_taken = (Date.now() - (new Date(responses[i].timestamp).getTime()+5000));
+        let points = time_taken/quiz_instance.page.timeLimit;
+        if (!(quiz.pages[responses[i].q_id].correctAnswers.includes(responses[i].response)||quiz.pages[responses[i].q_id].correctAnswers.includes(Number(responses[i].response)))){
+          points = 0;
+        }
+        responses[i].used = true;
+          if (inLeaderboard(responses[i].teamname)){
+            let index = -1;
+            for (let j = 0;j<leaderboard.length;j++){
+              if (leaderboard[j].name == responses[i].teamname){
+                index = j;
+                break;
+              }
+            }
+            leaderboard[index].points += points;
+          }else{
+            leaderboard.push({name:responses[i].teamname,points:points})
+          }
+      }
+    }
+    let { data, error } = await supabase
+      .from("quiz_instance")
+      .update({leaderboard:leaderboard})
+      .eq("id", quiz_instance.id);
+    console.log(quiz_instance.leaderboard,responses);
+    {
+      let { data, error } = await supabase
+      .from("quiz_instance_responses")
+      .update({ responses:responses})
+      .eq("id", quiz_instance.id);
+    }
+  }
   const showQuestionResponses = async (stack) => {
+
     if (stack == undefined){
       stack = 0;
     }
@@ -323,12 +376,14 @@ const hostQuiz = () => {
     if (isEmpty(quiz)){
       return -1;
     }
+    let { data, error } = await supabase
+    .from("quiz_instance")
+    .update({ status: "show_answer",page:{...quiz?.pages[quiz_instance.current_page]}})
+    .eq("id", quiz_instance.id);
+
     setBeforeshowtimer(false);
     setQuestionshowtimer(false);
-    let { data, error } = await supabase
-      .from("quiz_instance")
-      .update({ status: "show_answer",page:{...quiz?.pages[quiz_instance.current_page]}})
-      .eq("id", quiz_instance.id);
+    updateLeaderboard();
     
   };
   return (
@@ -404,7 +459,7 @@ const hostQuiz = () => {
                 who's at the top?
               </DialogDescription>
             </DialogHeader>
-            <Leaderboard leaderboard={quiz_instance.leaderboard}></Leaderboard>
+            <Leaderboard key = {JSON.stringify(quiz_instance)} leaderboard={quiz_instance.leaderboard}></Leaderboard>
             <DialogFooter className="sm:justify-start">
               <DialogClose asChild>
                 <Button type="button" variant="secondary">
@@ -447,7 +502,7 @@ const hostQuiz = () => {
               </h1>
             </div>
             <span className="text-center text-muted-foreground text-lg">Leaderboard</span>
-            <Leaderboard leaderboard={quiz_instance.leaderboard}></Leaderboard>
+            <Leaderboard key = {JSON.stringify(quiz_instance)} leaderboard={quiz_instance.leaderboard}></Leaderboard>
           </>
         )}
         {quiz_instance?.status == "display_q" && beforeshowtimer == true && (
@@ -484,7 +539,7 @@ const hostQuiz = () => {
                 )}
                 {quiz_instance.page.type == "leaderboard" && (
                   <>
-                    <Leaderboard leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
+                    <Leaderboard key = {JSON.stringify(quiz_instance)} leaderboard={quiz_instance.leaderboard}></Leaderboard>
                   </>
                 )}
               
@@ -531,7 +586,7 @@ const hostQuiz = () => {
                 )}
                 {quiz_instance.page.type == "leaderboard" && (
                   <>
-                    <Leaderboard leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
+                    <Leaderboard key = {JSON.stringify(quiz_instance)} leaderboard={quiz_instance.leaderboard}></Leaderboard>
                   </>
                 )}
             </div>

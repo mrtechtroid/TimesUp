@@ -97,11 +97,16 @@ const editQuiz = () => {
   };
   const startQuiz =  () => {
     const { data,error } = supabase.from('quiz_instance')
-    .insert({ quiz_id: quiz_id, host: quiz.host  })
+    .insert({ quiz_id: quiz_id, host: quiz.host,quiz_title:quiz.title,total_pages:quiz.pages.length,leaderboard:[],page:{}  })
     .select().then((e)=>{
       console.log(e.data)
-      router.push('/quiz_host/' + e.data[0].id)
+      const { data,error } = supabase.from('quiz_instance_responses')
+      .insert({ id:e.data[0].id,quiz_id: quiz_id, host: quiz.host,responses:[], }).select("*").then((e)=>{
+        router.push('/quiz_host/' + e.data[0].id)
+      })
+      
     })
+
   };
 
   const deleteTeam = (index) => {

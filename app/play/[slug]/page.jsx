@@ -122,19 +122,16 @@ const Timer = ({ seconds, onComplete }) => {
     </div>
   );
 };
-const Leaderboard = (leaderboard) => {
+const Leaderboard = ({leaderboard}) => {
+  if (leaderboard==undefined){
+    return
+  }
+  leaderboard = leaderboard.sort((a,b)=>b.points-a.points);
   // if (leaderboard.length ==0){
-    leaderboard = [
-      {name:"Tom Chen",points:100},
-      {name:"John Doe",points:95},
-      {name:"Jane Smith",points:85},
-      {name:"Bob Johnson",points:75},
-      {name:"Sarah Lee",points:65},
-    ];
   // }
-  return (<div>
+  return (<div key = {JSON.stringify(leaderboard)}>
     <Card className="w-[50vw] max-w-md">
-    <CardContent className="grid gap-4 h-[400px] overflow-y-scroll p-4">
+    <CardContent className="flex flex-col gap-4 h-[400px] overflow-y-scroll p-4">
         {leaderboard.length>=1 && 
         <div className="flex items-center justify-between h-[40px]">
         <div className="flex items-center gap-2">
@@ -224,7 +221,8 @@ const playQuiz = () => {
     });
   },[user_])
   const send_question_response = async(response) =>{
-    let {data,error} = await supabase.rpc('add_response_to_quiz_instance',{p_name:user.name,p_teamname:user.team_name,response:response,p_qIndex:quiz_instance.current_page,p_quiz_instance_id:quiz_id});
+    console.log(user);
+    let {data,error} = await supabase.rpc('add_response_to_quiz_instance',{p_name:user.name,p_teamname:user.team_name,p_response:response,p_qindex:quiz_instance.current_page,p_quiz_instance_id:quiz_id});
     if (error != undefined){
       console.log(error)
       return;
@@ -362,7 +360,7 @@ const playQuiz = () => {
                 who's at the top?
               </DialogDescription>
             </DialogHeader>
-            <Leaderboard leaderboard={quiz_instance.leaderboard}></Leaderboard>
+            <Leaderboard key = {JSON.stringify(quiz_instance.leaderboard)}  leaderboard={quiz_instance.leaderboard}></Leaderboard>
             <DialogFooter className="sm:justify-start">
               <DialogClose asChild>
                 <Button type="button" variant="secondary">
@@ -403,7 +401,7 @@ const playQuiz = () => {
               </h1>
             </div>
             <span className="text-center text-muted-foreground text-lg">Leaderboard</span>
-            <Leaderboard leaderboard={quiz_instance.leaderboard}></Leaderboard>
+            <Leaderboard key = {JSON.stringify(quiz_instance.leaderboard)}  leaderboard={quiz_instance.leaderboard}></Leaderboard>
           </>
         )}
         {quiz_instance?.status == "display_q" && beforeshowtimer == true && (
@@ -426,7 +424,7 @@ const playQuiz = () => {
                       <button
                         key={optionIndex}
                         className="bg-card-foreground text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"
-                          onClick={() => setResponse(option)}
+                          onClick={() => setResponse(optionIndex)}
                       >
                         {option}
                       </button>
@@ -441,7 +439,7 @@ const playQuiz = () => {
                 <Button onClick={()=>send_question_response(response)}>Submit</Button>
                 {quiz_instance.page.type == "leaderboard" && (
                   <>
-                    <Leaderboard leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
+                    <Leaderboard key = {JSON.stringify(quiz_instance.leaderboard)}  leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
                   </>
                 )}
               
@@ -489,7 +487,7 @@ const playQuiz = () => {
                 )}
                 {quiz_instance.page.type == "leaderboard" && (
                   <>
-                    <Leaderboard leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
+                    <Leaderboard key = {JSON.stringify(quiz_instance.leaderboard)}  leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
                   </>
                 )}
             </div>
