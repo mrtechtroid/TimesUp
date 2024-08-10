@@ -4,6 +4,8 @@ import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  ArrowRight,
+  ChartNoAxesColumn,
   CircleUser,
   DeleteIcon,
   Flag,
@@ -79,7 +81,10 @@ function CrownIcon(props) {
     </svg>
   )
 }
-const Timer = ({ seconds, onComplete }) => {
+const Timer = ({ seconds, onComplete,totalTime }) => {
+  if (totalTime == undefined){
+    totalTime = seconds;
+  }
   // initialize timeLeft with the seconds prop
   const [timeLeft, setTimeLeft] = useState(seconds);
   useEffect(() => {
@@ -113,7 +118,7 @@ const Timer = ({ seconds, onComplete }) => {
   return (
     <div>
       <AnimatedCircularProgressBar
-        max={Math.ceil(seconds)}
+        max={totalTime}
         min={0}
         value={Math.ceil(timeLeft)<0?-1:Math.ceil(timeLeft)}
         gaugePrimaryColor="rgb(79 70 229)"
@@ -337,7 +342,7 @@ const hostQuiz = () => {
     let leaderboard = quiz_instance.leaderboard;
     for (let i = 0;i<responses.length;i++){
       if (responses[i].used == false){
-        let time_taken = (Date.now() - (new Date(responses[i].timestamp).getTime()+5000));
+        let time_taken = ((new Date(responses[i].timestamp).getTime()-new Date(quiz_instance.page.displayOn).getTime()+5000));
         let points = parseInt(1000*(1-time_taken/(quiz_instance.page.timeLimit*1000)));
         if (!(quiz.pages[responses[i].q_id].correctAnswers.includes(responses[i].response)||quiz.pages[responses[i].q_id].correctAnswers.includes(Number(responses[i].response)))){
           points = 0;
@@ -381,7 +386,7 @@ const hostQuiz = () => {
     }
     let { data, error } = await supabase
     .from("quiz_instance")
-    .update({ status: "show_answer",page:{...quiz?.pages[quiz_instance.current_page]}})
+    .update({ status: "show_answer",page:{...quiz_instance?.page, ...quiz?.pages[quiz_instance.current_page]}})
     .eq("id", quiz_instance.id);
 
     setBeforeshowtimer(false);
@@ -407,10 +412,10 @@ const hostQuiz = () => {
               className="fixed bottom-4 right-4 z-10 rounded-full"
               onClick={showQuestionResponses}
             >
-              Skip Question
+              <ArrowRight className="text-white" />
             </Button>
         }
-        {quiz_instance?.status == "display_q" || quiz_instance?.status == "show_answer" && <Button
+        {(quiz_instance?.status == "display_q" || quiz_instance?.status == "show_answer") && <Button
               variant="outline"
               size="icon"
               className="fixed bottom-4 left-4 z-10 rounded-full text-white" disabled
@@ -469,7 +474,8 @@ const hostQuiz = () => {
               size="icon"
               className="fixed top-4 left-4 z-10 rounded-full"
             >
-              <Flag className="text-primary" />
+              {/* <Flag className="text-primary" /> */}
+              <ChartNoAxesColumn className="text-primary"></ChartNoAxesColumn>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
@@ -565,7 +571,7 @@ const hostQuiz = () => {
               
             </div>
             <div className="fixed center-y right-4">
-              <Timer
+              <Timer totalTime = {quiz_instance?.page?.timeLimit}
                 seconds={
                   (quiz_instance.page.displayOn -
                     Date.now() +

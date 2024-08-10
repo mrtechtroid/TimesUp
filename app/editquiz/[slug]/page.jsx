@@ -64,6 +64,7 @@ const editQuiz = () => {
             </Link>)
         })
         setQuiz_instance(quizzes_)
+        // setTeams(e.data.team_info)
       })
     })
   },[])

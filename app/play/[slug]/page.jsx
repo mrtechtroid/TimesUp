@@ -4,6 +4,7 @@ import { redirect, useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  ChartNoAxesColumn,
   CircleUser,
   DeleteIcon,
   Flag,
@@ -79,7 +80,10 @@ function CrownIcon(props) {
     </svg>
   )
 }
-const Timer = ({ seconds, onComplete }) => {
+const Timer = ({ seconds, onComplete,totalTime }) => {
+  if (totalTime == undefined){
+    totalTime = seconds;
+  }
   // initialize timeLeft with the seconds prop
   const [timeLeft, setTimeLeft] = useState(seconds);
   useEffect(() => {
@@ -113,7 +117,7 @@ const Timer = ({ seconds, onComplete }) => {
   return (
     <div>
       <AnimatedCircularProgressBar
-        max={Math.ceil(seconds)}
+        max={totalTime}
         min={0}
         value={Math.ceil(timeLeft)<0?-1:Math.ceil(timeLeft)}
         gaugePrimaryColor="rgb(79 70 229)"
@@ -220,7 +224,7 @@ const playQuiz = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({quiz_instance:quiz_id,name: user_?.user_metadata?.name, uuid: user?.id, email: user?.email}),
+      body: JSON.stringify({quiz_instance:quiz_id,name: user_?.user_metadata?.name, uuid: user_?.id, email: user_?.email}),
     }).then(response => response.json())
     .then(data => {
       if (data.status == false){
@@ -230,6 +234,7 @@ const playQuiz = () => {
       setUser(data)
     });
   },[user_])
+
   const send_question_response = async(response) =>{
     console.log(user);
     let {data,error} = await supabase.rpc('add_response_to_quiz_instance',{p_name:user.name,p_teamname:user.team_name,p_response:response,p_qindex:quiz_instance.current_page,p_quiz_instance_id:quiz_id});
@@ -284,13 +289,27 @@ const playQuiz = () => {
   
   const startTimer = async () => {
     setBeforeshowtimer(true);
+    setResponse("")
     setQuestionshowtimer(false);
     setAnswered(false);
-    setResponse("");
+    for (let i = 0;i<quiz_instance?.answered_teams?.length;i++){
+      if (quiz_instance.answered_teams[i].name == user.team_name){
+        setAnswered(true)
+        setResponse(quiz_instance.answered_teams[i].response)
+      }
+    }
+    
   };
   const showQuestion = async (stack) => {
     setBeforeshowtimer(false);
     setQuestionshowtimer(true);
+    setAnswered(false);
+    for (let i = 0;i<quiz_instance?.answered_teams?.length;i++){
+      if (quiz_instance.answered_teams[i].name == user.team_name){
+        setAnswered(true)
+        setResponse(quiz_instance.answered_teams[i].response)
+      }
+    }
   };
   const showQuestionResponses = async (stack) => {
     if (stack == undefined){
@@ -301,10 +320,10 @@ const playQuiz = () => {
     setQuestionshowtimer(false);
   };
   useEffect(() => {
-
     for (let i = 0;i<quiz_instance?.answered_teams?.length;i++){
-      if (quiz_instance.answered_teams[i] == user.team_name){
+      if (quiz_instance.answered_teams[i].name == user.team_name){
         setAnswered(true)
+        setResponse(quiz_instance.answered_teams[i].response)
       }
     }
   },[quiz_instance.answered_teams])
@@ -371,7 +390,7 @@ const playQuiz = () => {
               size="icon"
               className="fixed top-4 left-4 z-10 rounded-full"
             >
-              <Flag className="text-primary" />
+              <ChartNoAxesColumn className="text-primary"></ChartNoAxesColumn>
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
@@ -438,15 +457,15 @@ const playQuiz = () => {
           <>
             <div className="max-w-screen-md mx-auto text-center text-xl md:text-4xl font-bold m-6">
               <h1>{quiz_instance.page.question}</h1>
+              {answered && <span className="text-green-500">You have answered this question</span>}
               <div className="grid grid-cols-2 gap-4" key = {response}>
-                {answered && <span>You have answered this question</span>}
                 {!answered && quiz_instance.page.type == "select_answer" &&
                   quiz_instance.page.options.map((option, optionIndex) => (
                     <div key={optionIndex}>
                       <button
                         key={JSON.stringify({optionIndex,response})}
-                        style={{borderColor:(response==optionIndex?"yellow":"")}}
-                        className="bg-card-foreground text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"
+                        style={{backgroundColor:(response==optionIndex?"grey":"")}}
+                        className="border-2 bg-card-foreground text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"
                           onClick={() => setResponse(optionIndex)} 
                       >
                         {option}
@@ -468,7 +487,7 @@ const playQuiz = () => {
               
             </div>
             <div className="fixed center-y right-4">
-              <Timer
+              <Timer  totalTime = {quiz_instance?.page?.timeLimit}
                 seconds={
                   (quiz_instance.page.displayOn -
                     Date.now() +
@@ -500,7 +519,6 @@ const playQuiz = () => {
                     </div>
                   ))}
                   {quiz_instance?.page?.type == "select_answer"&&quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-green-500">Correct!</span>}
-                  {quiz_instance?.page?.type == "select_answer"&& !quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-red-500">Incorrect!</span>}
               </div>
               {quiz_instance?.page?.type == "type_answer" && (
                   <>
