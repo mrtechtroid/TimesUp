@@ -1,93 +1,64 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+# TimesUp
+![image](https://github.com/user-attachments/assets/4b3de735-bab0-48f1-b3c8-e5e88e4d153f)
+An interactive, simple to use for all your quizzing needs.   
+🌐 Live at: [TimesUp!](https://timesup.mtt.one)
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+
+## Tech Stack
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![NextJS](https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+
+## Problem Statement
+Design a real-time quiz application that enables users to participate in live quizzes, receive instant feedback, and compete for top scores. The app should support user registration, quiz creation, scoring, and real-time synchronization.
 
 ## Features
+#### Dashboard (/dashboard)
+- See all previous quizzes, you created.
+- See options to host, join, create a quiz.
+- Change account settings. 
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+#### Edit Quiz (/editquiz)
+- Edit quiz names, guest access, pages, teams, etc on this page.
+- Create a new quiz instance from this page. 
 
-## Demo
+#### Quiz Host (/quiz_host/[quiz_id])
+- The host interface for conducting the quiz. Allows changing questions, seeing live leaderboards, starting timers, etc. 
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+#### Play (/play/[quiz_id])
+- Player interface for participating in the quiz. Allow submission of responses, particpate individually or in teams. 
 
-## Deploy to Vercel
+and many more. (Tried to be as concise as possible here)
+## Installation and Deployment
 
-Vercel deployment will guide you through creating a Supabase account and project.
+1. Download this github repository as ZIP, Extract the zip file. Alternatively use `git clone`
+2. Create a new database inside a new project in supabase with schema as mentioned in the `(schema.png)` image in the `supabase-functions` directory. 
+3. Keep note of three things, the anon api key, the service_role api key, and the url.
+4. In the frontend, use the command `npm install` to install all dependencies, then create a new `.env.local` file with the following things
+```
+NEXT_PUBLIC_SUPABASE_URL=url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=anon api key
+NEXT_PUBLIC_SUPABASE_SERVICE_KEY=service api key
+```
+6. Type the command `npm run dev` .
+7. The website will be live on `localhost:3000`.
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## Challenges Encountered
+- This was the first time, of me working with React. Also I had less than 10 days before submission deadline, hence had to learn about React as quickly as possible, the states, hooks, contexts, etc.
+- Thinking and Implementing the real time nature of the app while communicating with the SQL based Supabase backend, was a tedious task.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This%20starter%20configures%20Supabase%20Auth%20to%20use%20cookies%2C%20making%20the%20user's%20session%20available%20throughout%20the%20entire%20Next.js%20app%20-%20Client%20Components%2C%20Server%20Components%2C%20Route%20Handlers%2C%20Server%20Actions%20and%20Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6)
+## Applications
+1. Education - Allows for quizzing in online and physical classes, helping teachers conduct lectures more interactively.
+2. Games - Makes it easy for live game hosts, to conduct live games.
+3. Feedback - Allows users to give feedback during a live event. 
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+## Further Improvements
+1. Adding a buzzer, and multiple other question types such as MCQ_Multiple, etc.
+2. Allow addition of images, and increasing customisability of pages.
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
-
-## Clone and run locally
-
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
-
-2. Create a Next.js app using the Supabase Starter template npx command
-
-   ```bash
-   npx create-next-app -e with-supabase
-   ```
-
-3. Use `cd` to change into the app's directory
-
-   ```bash
-   cd name-of-new-app
-   ```
-
-4. Rename `.env.local.example` to `.env.local` and update the following:
-
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
-
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-
-5. You can now run the Next.js local development server:
-
-   ```bash
-   npm run dev
-   ```
-
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
-
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
-
-## Feedback and issues
-
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+## Contributors
+With ❤️ By Mr Techtroid (mtt.ONE)
