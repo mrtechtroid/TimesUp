@@ -1,106 +1,119 @@
-"use client"
-import { createClient } from '@/utils/supabase/client';
-import { useEffect, useState } from 'react';
+"use client";
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Router } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-const Host = () => {
-  const supabase = createClient();
-  const { slug } = useParams();
-  const room_id = slug;
-  let room;
-  const [userStates, setUserStates] = useState({});
-  const [myState, setMyState] = useState({});
-  const [players, setPlayers] = useState([]);
-  const [playSound, setPlaySound] = useState(false);
-  const [locked, setLocked] = useState(false);
-  useEffect(() => {
-    let players = []
-    for (let key in userStates){
-        players.push({...userStates[key]});
-        if (userStates[key].user == "host"){
-            setLocked(userStates[key].noBuzzers);
-        }
-    }
-    setPlayers(players)
-    },[userStates]);
+const Player = () => {
+    const { slug } = useParams();
+    const room_id = slug;
+    const supabase = createClient();
+    const [user,setUser] = useState({})
+    const [playerName,setPlayerName] = useState("");
+    const [buzz_instance,setBuzz_instance] = useState({});
     useEffect(() => {
-        room = supabase.channel("buzz_" + room_id);
-        setMyState({
-          user: "player",
-          name:"x",
-          online_at: new Date().toISOString(),
-          buzz: false,
-          buzzedAt: Date.now(),
-          noBuzzers: false,
-        });
-        room
-          .on("presence", { event: "sync" }, () => {
-            const newState = room.presenceState();
-            setUserStates(newState)
-            console.log("sync", newState);
-          })
-          .on("presence", { event: "join" }, ({ key, newPresences }) => {
-            console.log("join", key, newPresences);
-          })
-          .on("presence", { event: "leave" }, ({ key, leftPresences }) => {
-            console.log("leave", key, leftPresences);
-          })
-          .subscribe(async (status) => {
-            console.log(status);
-            const presenceTrackStatus = await room.track(myState);
-            console.log(presenceTrackStatus);
-          });
-          return () =>{
-            room.unsubscribe();
-          };
-      }, []);
+        if (playerName == ""){
+          return;
+        }
+        async function putPlayerInBuzz(){
+            const { data, error } = await supabase.rpc('insert_player',{room_id:room_id,player_name:playerName})
+            if (error) {
+                console.error('Error buzzing:', error.message);
+            }
+            setPlayerSent(true)
+        }
+        putPlayerInBuzz()
+        
+        return ()  => {
+          
+        };
+    },[playerName])
+    useEffect(() => {
+      supabase.auth.getUser().then((e)=>{
+        setUser(e?.data?.user)
+        setPlayerName(e?.data?.user?.user_metadata?.name)
+      })
+    },[])
+    
+    const [buzzed, setBuzzed] = useState(false);
+    const [locked, setLocked] = useState(true);
+    const [playerSent, setPlayerSent] = useState(false);
+    const router = useRouter()
+
+    useEffect(() => {
+        const fetchLockedStatus = async () => {
+            const { data,error } = await supabase
+                .from('buzzes')
+                .select('*')
+                .eq("id", room_id);
+            setLocked(data.locked);
+        };
+
+        fetchLockedStatus();
+
+        supabase
+        .channel("buzz_host_" + room_id)
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "buzzes",
+            filter: "id=eq." + room_id,
+          },
+          function (payload) {
+                setLocked(payload.new.locked);
+                setBuzz_instance(payload.new)
+          }).subscribe()
+
+    }, []);
+    useEffect(() => {
+      console.log(playerName,user)
+    },[user])
+    useEffect(() => {
+        console.log(buzz_instance)
+    setBuzzed(false)
+      for (let i = 0;i<buzz_instance?.buzzers?.length;i++){
+        if (buzz_instance.buzzers[i].name == playerName){
+          setBuzzed(true)
+          if (buzz_instance.buzzers[i].kick == true){
+            router.push("/error?message=You are kicked from the room")
+          }
+        }
+      }
+      },[buzz_instance])
+    const handleBuzz = async () => {
+        if (!locked && !buzzed) {
+            const { data, error } = await supabase.rpc('insert_buzz', {
+                player_name: playerName,
+                room_id: room_id,
+            });
+
+
+            if (error) {
+                console.error('Error buzzing:', error.message);
+            } else {
+                setBuzzed(true);
+            }
+        }
+    };
 
     return (
-        
-        <div className="host-container">{JSON.stringify(players)}
-            <h2>Host Panel</h2>
-            <div className="host-section">
-                <h3>Players</h3>
-                <ul className="player-list">
-                    {players.map(player => (
-                        <li key={player.id} className="player-item">
-                            {player.name} 
-                            <button className="kick-button" onClick={() => {/* Handle kick */}}>Kick</button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-            <div className="host-section">
-                <h3>Buzzes</h3>
-                <ul className="buzz-list">
-                    {players.sort((a, b) => a.buzzedAt - b.buzzedAt).map((buzz, index) => (
-                        <li key={index} className="buzz-item">
-                            {buzz.name} - {new Date(buzz.buzzedAt).toLocaleTimeString()}
-                        </li>
-                    ))}
-                </ul>
-                <button className="clear-button" onClick={() => {/* Handle clear */}}>Clear All Buzzes</button>
-            </div>
-            <div className="host-controls">
-                <label>
-                    <input 
-                        type="checkbox" 
-                        checked={playSound} 
-                        onChange={() => setPlaySound(!playSound)}
-                    />
-                    Play Sound on Buzz
-                </label>
-                <label>
-                    <input 
-                        type="checkbox" 
-                        checked={locked} 
-                        onChange={() => setLocked(!locked)}
-                    />
-                    Lock Buzzes
-                </label>
-            </div>
+        <div className="flex flex-col items-center">
+            <h2 className="text-2xl font-bold mb-4">Player: {playerName}</h2>
+            <Button
+                onClick={handleBuzz}
+                disabled={locked || buzzed}
+                className={`bg-blue-500 text-white w-[300px] h-[300px] he px-4 py-2 rounded-lg ${
+                    locked || buzzed ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+            >
+                {locked?"Locked":buzzed?"Buzzed":"Buzz!"}
+            </Button>
         </div>
     );
 };
 
-export default Host;
+export default Player;

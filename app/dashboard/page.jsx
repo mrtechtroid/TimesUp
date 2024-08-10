@@ -186,7 +186,7 @@ function DashboardView({ db_fn,changeDBFN }) {
           </div>
           </div>
           <div>
-          <h1 className="text-lg font-semibold md:text-2xl">Buzz</h1>
+          {/* <h1 className="text-lg font-semibold md:text-2xl">Buzz</h1>
           <div
             className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm m-4 flex-wrap"
             x-chunk="dashboard-02-chunk-1"
@@ -207,7 +207,8 @@ function DashboardView({ db_fn,changeDBFN }) {
               </CardContent>
             </Card>
             </Link>
-            </div></div>
+            </div> */}
+            </div>
         </main>
       </>
     );
