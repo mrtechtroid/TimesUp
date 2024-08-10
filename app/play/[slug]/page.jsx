@@ -132,6 +132,9 @@ const Leaderboard = ({leaderboard}) => {
   return (<div key = {JSON.stringify(leaderboard)}>
     <Card className="w-[50vw] max-w-md">
     <CardContent className="flex flex-col gap-4 h-[400px] overflow-y-scroll p-4">
+    {leaderboard.length ==0 && <div>
+        Get at least one question correct to be ranked!
+        </div>}
         {leaderboard.length>=1 && 
         <div className="flex items-center justify-between h-[40px]">
         <div className="flex items-center gap-2">
@@ -187,12 +190,19 @@ const playQuiz = () => {
   const quiz_id = slug;
   const router = useRouter();
   const supabase = createClient();
-  const [response, setResponse] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [response, setResponse_] = useState("");
+  // const [submitted, setSubmitted] = useState(false);
+  const [answered, setAnswered] = useState(false);
   // const { theme, setTheme } = useTheme();
   useEffect(() => {
     setLoaded(0);
   },[])
+  function setResponse(response){
+    if (answered){
+      return;
+    }
+    setResponse_(response)
+  }
   function isEmpty(obj) {
     return Object.keys(obj).length === 0;
   }
@@ -202,7 +212,7 @@ const playQuiz = () => {
     })
   },[])
   useEffect(() => {
-    if (user_==undefined || user_==null){
+    if (isEmpty(user_)){
       return;
     }
     fetch('/api/user_quiz_instance', {
@@ -227,6 +237,7 @@ const playQuiz = () => {
       console.log(error)
       return;
     }
+    // user_.responses.push({response:response,time:Date.now()})
   }
   useEffect(() => {
     supabase.auth.getSession().then((e) => {
@@ -274,6 +285,8 @@ const playQuiz = () => {
   const startTimer = async () => {
     setBeforeshowtimer(true);
     setQuestionshowtimer(false);
+    setAnswered(false);
+    setResponse("");
   };
   const showQuestion = async (stack) => {
     setBeforeshowtimer(false);
@@ -287,6 +300,14 @@ const playQuiz = () => {
     setBeforeshowtimer(false);
     setQuestionshowtimer(false);
   };
+  useEffect(() => {
+
+    for (let i = 0;i<quiz_instance?.answered_teams?.length;i++){
+      if (quiz_instance.answered_teams[i] == user.team_name){
+        setAnswered(true)
+      }
+    }
+  },[quiz_instance.answered_teams])
   return (
     <>   
       <div className="flex flex-col items-center justify-center w-[100vw] h-[100vh] ">
@@ -417,26 +438,28 @@ const playQuiz = () => {
           <>
             <div className="max-w-screen-md mx-auto text-center text-xl md:text-4xl font-bold m-6">
               <h1>{quiz_instance.page.question}</h1>
-              <div className="grid grid-cols-2 gap-4">
-                {quiz_instance.page.type == "select_answer" &&
+              <div className="grid grid-cols-2 gap-4" key = {response}>
+                {answered && <span>You have answered this question</span>}
+                {!answered && quiz_instance.page.type == "select_answer" &&
                   quiz_instance.page.options.map((option, optionIndex) => (
                     <div key={optionIndex}>
                       <button
-                        key={optionIndex}
+                        key={JSON.stringify({optionIndex,response})}
+                        style={{borderColor:(response==optionIndex?"yellow":"")}}
                         className="bg-card-foreground text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"
-                          onClick={() => setResponse(optionIndex)}
+                          onClick={() => setResponse(optionIndex)} 
                       >
                         {option}
                       </button>
                     </div>
                   ))}
                 </div>
-                {quiz_instance.page.type == "type_answer" && (
+                {!answered &&quiz_instance.page.type == "type_answer" && (
                   <>
                     <Input className="text-xl center-x" placeholder="Answer" onChange={(e)=>setResponse(e.target.value)} />
                   </>
                 )}
-                <Button onClick={()=>send_question_response(response)}>Submit</Button>
+                <Button onClick={()=>send_question_response(response)} disabled={answered}>Submit</Button>
                 {quiz_instance.page.type == "leaderboard" && (
                   <>
                     <Leaderboard key = {JSON.stringify(quiz_instance.leaderboard)}  leaderboard={quiz_instance.page.leaderboard}></Leaderboard>
@@ -468,7 +491,7 @@ const playQuiz = () => {
                     <div key={optionIndex}>
                       <button
                         key={optionIndex}
-                        style={{backgroundColor:(quiz_instance?.page?.correctAnswers?.includes(optionIndex)?"green":!quiz_instance?.page?.correctAnswers?.includes(response) && optionIndex==response?"red":"")}}
+                        style={{borderColor:(response==optionIndex?"yellow":""),backgroundColor:(quiz_instance?.page?.correctAnswers?.includes(optionIndex)?"green":!quiz_instance?.page?.correctAnswers?.includes(response) && optionIndex==response?"red":"")}}
                         className={"bg-card-foreground text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"}
                         //   onClick={() => handleAnswer(index)}
                       >
@@ -476,12 +499,15 @@ const playQuiz = () => {
                       </button>
                     </div>
                   ))}
+                  {quiz_instance?.page?.type == "select_answer"&&quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-green-500">Correct!</span>}
+                  {quiz_instance?.page?.type == "select_answer"&& !quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-red-500">Incorrect!</span>}
               </div>
               {quiz_instance?.page?.type == "type_answer" && (
                   <>
                     <div className="flex flex-col items-center justify-center">
                       <Input className="text-xl border-white" placeholder="Answer" value = {response} disabled />
                       {quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-green-500">Correct!</span>}
+                      {!quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-red-500">Incorrect!</span>}
                     </div>
                   </>
                 )}

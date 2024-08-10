@@ -13,37 +13,37 @@ const featureList: FeaturesProps[] = [
     icon: "TabletSmartphone",
     title: "Mobile Friendly",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. A odio velit cum aliquam, consectetur.",
+      "Our responsive user interface allows users to play with ease on a device of any size, including tablets and smartphones.",
   },
   {
-    icon: "BadgeCheck",
-    title: "Social Proof",
+    icon: "DollarSign",
+    title: "Always Free",
     description:
-      "Lorem ipsum dolor sit amet consectetur. Natus consectetur, odio ea accusamus aperiam.",
+      "We don't believe in charging you for education or recreation. Hence we provide a free and open-source solution for you to use.",
   },
   {
-    icon: "Goal",
-    title: "Targeted Content",
+    icon: "Github",
+    title: "Open Source",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. odio ea accusamus aperiam.",
+      "Want to self host? We provide a free and open-source solution for you to use.",
   },
   {
-    icon: "PictureInPicture",
-    title: "Strong Visuals",
+    icon: "SlidersHorizontal",
+    title: "Complete Control",
     description:
-      "Lorem elit. A odio velit cum aliquam. Natus consectetur dolores, odio ea accusamus aperiam.",
+      "As the host, you have full control over your room, with the ability to clear individual or all buzzes and kick users from the room.",
   },
   {
-    icon: "MousePointerClick",
-    title: "Clear CTA",
+    icon: "Laugh",
+    title: "Ease of Use",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing. odio ea accusamus consectetur.",
+      "Simple and intuitive user interface, with a focus on ease of use.",
   },
   {
-    icon: "Newspaper",
-    title: "Clear Headline",
+    icon: "User",
+    title: "Large Rooms",
     description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. A odio velit cum aliquam. Natus consectetur.",
+      "Each room can accommodate up to 100 participants, making it suitable for large gatherings.",
   },
 ];
 
@@ -59,9 +59,7 @@ export const FeaturesSection = () => {
       </h2>
 
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-8">
-        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptatem
-        fugiat, odit similique quasi sint reiciendis quidem iure veritatis optio
-        facere tenetur.
+        Here's what makes TimesUp! the best online quiz solution for your quizzing needs.
       </h3>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

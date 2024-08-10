@@ -13,32 +13,32 @@ interface FAQProps {
 
 const FAQList: FAQProps[] = [
   {
-    question: "Is this template free?",
-    answer: "Yes. It is a free NextJS Shadcn template.",
+    question: "Is this site free?",
+    answer: "Yes. It is a completely free site. No ads, no tracking, no cookies.",
     value: "item-1",
   },
   {
-    question: "Duis aute irure dolor in reprehenderit in voluptate velit?",
+    question: "How many particpants can I have?",
     answer:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sint labore quidem quam consectetur sapiente, iste rerum reiciendis animi nihil nostrum sit quo, modi quod.",
+      "You can have as many participants as you want. You can invite your friends to join. We recommeend you to have at least 5 particapants. ",
     value: "item-2",
   },
   {
     question:
-      "Lorem ipsum dolor sit amet Consectetur natus dolor minus quibusdam?",
+      "How can I contribute to the project?",
     answer:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Labore qui nostrum reiciendis veritatis.",
+      "You can contribute to the project by giving us a star on Github. You can also contribute by creating a pull request. We are open to any contributions.",
     value: "item-3",
   },
   {
-    question: "Excepteur sint occaecat cupidata non proident sunt?",
-    answer: "Lorem ipsum dolor sit amet consectetur, adipisicing elit.",
+    question: "Why is sign up required?",
+    answer: "We dont like bots. We want to make sure that only people who are real people are using the site.",
     value: "item-4",
   },
   {
     question:
-      "Enim ad minim veniam, quis nostrud exercitation ullamco laboris?",
-    answer: "consectetur adipisicing elit. Sint labore.",
+      "More questions? Where can I ask them?",
+    answer: "You can ask them on our Discord server.",
     value: "item-5",
   },
 ];

@@ -49,11 +49,11 @@ const editQuiz = () => {
   useEffect(() => {
     console.log(1)
     supabase.auth.getSession().then((e)=>{  
-      supabase.from('quiz_instance').select("*").eq("host",e.data.session.user.id).then((e)=>{
+      supabase.from('quiz_instance').select("*").eq("quiz_id",quiz_id).then((e)=>{
         let quiz_server = e.data
         let quizzes_ = quiz_server?.map(quiz => {
           return (
-            <Link key={quiz.id} href={`/editquiz/${quiz.id}`} className="w-full">
+            <Link key={quiz.id} href={`/quiz_host/${quiz.id}`} className="w-full">
             <Alert className="m-4 w-full">
               <NotepadText className="h-4 w-4" />
               <AlertTitle>{quiz.id}</AlertTitle>
@@ -97,7 +97,7 @@ const editQuiz = () => {
   };
   const startQuiz =  () => {
     const { data,error } = supabase.from('quiz_instance')
-    .insert({ quiz_id: quiz_id, host: quiz.host,quiz_title:quiz.title,total_pages:quiz.pages.length,leaderboard:[],page:{}  })
+    .insert({ quiz_id: quiz_id, host: quiz.host,quiz_title:quiz.title,total_pages:quiz.pages.length,leaderboard:[],page:{},answered_teams:[],team_info:quiz.team_info  })
     .select().then((e)=>{
       console.log(e.data)
       const { data,error } = supabase.from('quiz_instance_responses')
@@ -261,9 +261,15 @@ const editQuiz = () => {
   };
   const saveForm = async () => {
     console.log(quiz)
-    const { error } = await supabase.from('quiz')
+    await supabase.from('quiz')
     .update({ title: quiz.title, pages:quiz.pages, require_signin: quiz.require_signin, team_info: quiz.team_info})
-    .eq('id', quiz_id)
+    .eq('id', quiz_id).then((e)=>{
+      if (e.error!=null){
+        alert("Error updating quiz")
+      }else{
+        alert("Quiz updated successfully")
+      }
+    })
   };
   return (
     <>
@@ -328,7 +334,7 @@ const editQuiz = () => {
                   Some previously created quiz instances.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="gap-4 flex flex-col">
+              <CardContent className="gap-4 flex flex-col max-h-[400px] overflow-scroll">
                 {quiz_instance?.length == 0 &&
                   <div className="flex items-center justify-center">
                     <h1>No quiz instances found</h1>
@@ -528,8 +534,9 @@ const editQuiz = () => {
           </div>
           {page.type === 'select_answer' && (
             <div>
+              Options:
               {page.options.map((option, optionIndex) => (
-                <div key={optionIndex}>
+                <div key={optionIndex} className="flex flex-row w-full">
                   <Input
                     type="text"
                     placeholder={`Option ${optionIndex + 1}`}
@@ -552,8 +559,9 @@ const editQuiz = () => {
           )}
           {page.type === 'type_answer' && (
             <div>
+              Correct Answers:
               {page.correctAnswers.map((answer, answerIndex) => (
-                <div key={answerIndex}>
+                <div key={answerIndex} className="flex flex-row w-full">
                   <Input
                     type="text"
                     placeholder={`Correct Answer ${answerIndex + 1}`}
@@ -589,7 +597,7 @@ const editQuiz = () => {
         </main>
       </div>
       {/*  */}
-      <pre>{JSON.stringify(quiz, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(quiz, null, 2)}</pre> */}
     </>
   );
 };

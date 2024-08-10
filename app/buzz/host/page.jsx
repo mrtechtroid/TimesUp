@@ -23,7 +23,7 @@ import Ripple from "@/components/magicui/ripple";
 export default function Join({searchParams,}){
     const Router = useRouter()
     const supabase = createClient()
-    let [code,setCode] = useState(searchParams.code||12345678)
+    let [code,setCode] = useState("quiz_app")
     let [user,setUser] = useState({})
     useEffect(() => {
       supabase.auth.getUser().then((e)=>{
@@ -34,39 +34,35 @@ export default function Join({searchParams,}){
       console.log(code)
       console.log(user)
       if (typeof window !== 'undefined') {
-          supabase.from('quiz_instance').select("*").eq("id",code).then((e)=>{
-              if (!e.error){
-                fetch('/api/add_user_quiz_instance', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({quiz_instance:code,name: user?.user_metadata.name, uuid: user?.id, email: user?.email}),
-                })
-              }
-          })
-          Router.push("/play/"+code)
+          const channel = supabase.channel('buzz_'+code)
+          channel.send({
+            type: 'broadcast',
+            event: 'ask_if_free',
+            payload: { message: 'Hi' },
+        }).then((resp) => console.log(resp))
+          Router.push("/buzz/host/"+code)
       }
   }
     return <>
     <div className="relative flex h-[100vh] w-[100vw] flex-col items-center justify-center overflow-hidden rounded-lg bg-background md:shadow-xl">
     <Card className="mx-auto max-w-sm z-10 bg-transparent border-none">
       <CardHeader className="flex-col items-center justify-center">
-        <CardTitle className="text-2xl">Join</CardTitle>
+        <CardTitle className="text-2xl">Create a Room</CardTitle>
         <CardDescription>
-          Enter Join Code
+          Enter Room Name
         </CardDescription>
       </CardHeader>
       <CardContent >
         <div className="grid gap-4">
           <div className="gap-2 flex flex-col justify-center items-center">
             <Input
-              id="joincode"
-              name = "joincode"
-              type="number"
-              placeholder="12345678"
+              id="roomname"
+              name = "roomname"
+              type="text"
+              placeholder="quiz_app"
+              value={searchParams.code}
               required
-              onChange={e => setCode(Number(e.target.value))}
+              onChange={e => setCode(e.target.value)}
             />
           </div>
           <Button type="submit" className="w-100" onClick={function(){join_match(code)}}>

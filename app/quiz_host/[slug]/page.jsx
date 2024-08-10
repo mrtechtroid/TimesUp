@@ -139,6 +139,9 @@ const Leaderboard = ({leaderboard}) => {
   return (<div>
     <Card className="w-[50vw] max-w-md">
     <CardContent className="flex flex-col gap-4 h-[400px] overflow-y-scroll p-4">
+      {leaderboard.length ==0 && <div>
+        Get at least one question correct to be ranked!
+        </div>}
         {leaderboard.length>=1 && 
         <div className="flex items-center justify-between h-[40px]">
         <div className="flex items-center gap-2">
@@ -294,7 +297,7 @@ const hostQuiz = () => {
     }else{
     let { data, error } = await supabase
       .from("quiz_instance")
-      .update({ status: "started", current_page: quiz_instance.current_page+1 })
+      .update({ status: "started", current_page: quiz_instance.current_page+1,answered_teams:[] })
       .eq("id", quiz_instance.id);
     }
   };
@@ -335,7 +338,7 @@ const hostQuiz = () => {
     for (let i = 0;i<responses.length;i++){
       if (responses[i].used == false){
         let time_taken = (Date.now() - (new Date(responses[i].timestamp).getTime()+5000));
-        let points = time_taken/quiz_instance.page.timeLimit;
+        let points = parseInt(1000*(1-time_taken/(quiz_instance.page.timeLimit*1000)));
         if (!(quiz.pages[responses[i].q_id].correctAnswers.includes(responses[i].response)||quiz.pages[responses[i].q_id].correctAnswers.includes(Number(responses[i].response)))){
           points = 0;
         }
@@ -398,6 +401,23 @@ const hostQuiz = () => {
           {theme === "light" ? <Moon className="size-5" /> : <Sun className="size-5" />}
         </Button>
         </div> */}
+        {quiz_instance?.status == "display_q" && <Button
+              variant="outline"
+              size="icon"
+              className="fixed bottom-4 right-4 z-10 rounded-full"
+              onClick={showQuestionResponses}
+            >
+              Skip Question
+            </Button>
+        }
+        {quiz_instance?.status == "display_q" || quiz_instance?.status == "show_answer" && <Button
+              variant="outline"
+              size="icon"
+              className="fixed bottom-4 left-4 z-10 rounded-full text-white" disabled
+            >
+              {quiz_response?.responses?.filter(item=>item.q_id==quiz_instance.current_page).length}
+            </Button>
+        }
         <Dialog>
           <DialogTrigger asChild>
             <Button
@@ -569,7 +589,7 @@ const hostQuiz = () => {
                       <button
                         key={optionIndex}
                         style={{backgroundColor:(quiz_instance?.page?.correctAnswers?.includes(optionIndex)?"green":"")}}
-                        className={"bg-card-foreground text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"}
+                        className={"text-lime-200 border-2 text-card hover:bg-primary hover:text-primary-foreground rounded-lg py-3 px-6 transition-colors text-lg md:text-2xl"}
                         //   onClick={() => handleAnswer(index)}
                       >
                         {option}
