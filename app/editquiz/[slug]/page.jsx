@@ -80,6 +80,7 @@ const editQuiz = () => {
         console.log(e.data);
         setQuiz(e.data[0]);
         setPages(e.data[0].pages);
+        setTeams(e.data[0].team_info);
       });
   }, []);
 
@@ -98,7 +99,7 @@ const editQuiz = () => {
   };
   const startQuiz =  () => {
     const { data,error } = supabase.from('quiz_instance')
-    .insert({ quiz_id: quiz_id, host: quiz.host,quiz_title:quiz.title,total_pages:quiz.pages.length,leaderboard:[],page:{},answered_teams:[],team_info:quiz.team_info  })
+    .insert({ quiz_id: quiz_id, host: quiz.host,quiz_title:quiz.title,total_pages:quiz.pages.length,leaderboard:[],page:{},answered_teams:[],team_info:quiz.team_info,require_signin:quiz.require_signin  })
     .select().then((e)=>{
       console.log(e.data)
       const { data,error } = supabase.from('quiz_instance_responses')
@@ -151,6 +152,9 @@ const editQuiz = () => {
       setTeams([]);
     }
   }, [enableTeams]);
+  useEffect(() => {
+    console.log(quiz)
+  }, [JSON.stringify(quiz)]);
   const addPage = () => {
     setPages([
       ...pages,
@@ -161,6 +165,7 @@ const editQuiz = () => {
     setQuiz({ ...quiz, title: title });
   };
   const changeSignIn = (signin) => {
+    console.log(signin)
     setQuiz({ ...quiz, require_signin: signin });
   };
   const deletePage = (index) => {
@@ -315,9 +320,10 @@ const editQuiz = () => {
                   <input
                     type="checkbox"
                     id="include"
-                    disabled
-                    onChange={(e) => changeSignIn(e.target.value)}
-                    checked={quiz.require_signin}
+                    // disabled
+                    key = {JSON.stringify(quiz)}
+                    onClick={(e) => changeSignIn(e.target.checked)}
+                    defaultChecked={quiz?.require_signin}
                   />
                   <label
                     htmlFor="include"

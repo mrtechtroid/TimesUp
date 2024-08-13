@@ -228,7 +228,7 @@ const playQuiz = () => {
     }).then(response => response.json())
     .then(data => {
       if (data.status == false){
-        redirect("/error/?message="+data.message)
+        router.push("/error/?message="+data.message)
         return;
       }
       setUser(data)

@@ -11,6 +11,7 @@ export async function POST(request) {
   const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL,env.SUPABASE_SERVICE_ROLE_KEY);
   let {data,error} = await supabase.from('quiz_instance').select("*").eq("id",body.quiz_instance);
   console.log(data,error)
+  let require_signin = data[0]?.require_signin||false;
   let team_info = data[0]?.team_info||[];
   for (let i = 0; i < team_info.length; i++) {
     for (let j = 0;j<team_info[i].players.length;j++){
@@ -22,6 +23,9 @@ export async function POST(request) {
     }
   console.log(team_info)
   // team_info.push({"name":body.name,"color":"","players":[{name: body.name, email: body.email}]})
+  if (require_signin){
+    return NextResponse.json({"status":false,"message":"Guest access is not allowed","reason":"arbitary"})
+  }
   {
     let {data,error} = await supabase.rpc("add_user_to_quiz_instance",{p_name:body.name,p_teamname:body.name,p_quiz_instance_id:body.quiz_instance,p_email:body.email});
     console.log(data,error)
