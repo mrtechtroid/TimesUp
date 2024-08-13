@@ -525,7 +525,7 @@ const playQuiz = () => {
                     <div className="flex flex-col items-center justify-center">
                       <Input className="text-xl border-white" placeholder="Answer" value = {response} disabled />
                       {quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-green-500">Correct!</span>}
-                      {!quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-red-500">Incorrect!</span>}
+                      {/* {!quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-red-500">Incorrect!</span>} */}
                     </div>
                   </>
                 )}

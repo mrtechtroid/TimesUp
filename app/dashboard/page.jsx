@@ -312,27 +312,27 @@ export default function Dashboard() {
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
-                <Link
-                  href="#"
+              <div
+                onClick={function(){changeDBFN("dashboard")}}
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                 >
                   <Home className="h-4 w-4" />
                   Dashboard
-                </Link>
-                <Link
-                  href="#"
+                </div>
+                <div
+                onClick={function(){changeDBFN("quiz")}}
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                 >
                   <NotepadText className="h-4 w-4" />
                   Quizzes
-                </Link>
-                <Link
-                  href="#"
+                </div>
+                <div
+                onClick={function(){changeDBFN("settings")}}
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                 >
                   <CircleUser className="h-4 w-4" />
                   Account Settings
-                </Link>
+                </div>
                 <Link
                   href="/auth/signout"
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"

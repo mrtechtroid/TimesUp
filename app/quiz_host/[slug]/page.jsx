@@ -342,8 +342,9 @@ const hostQuiz = () => {
     let leaderboard = quiz_instance.leaderboard;
     for (let i = 0;i<responses.length;i++){
       if (responses[i].used == false){
-        let time_taken = ((new Date(responses[i].timestamp).getTime()-new Date(quiz_instance.page.displayOn).getTime()+5000));
+        let time_taken = ((new Date(responses[i].timestamp).getTime()-new Date(quiz_instance.page.displayOn).getTime()-5000));
         let points = parseInt(1000*(1-time_taken/(quiz_instance.page.timeLimit*1000)));
+        console.log(time_taken,quiz_instance.page.timeLimit*1000)
         if (!(quiz.pages[responses[i].q_id].correctAnswers.includes(responses[i].response)||quiz.pages[responses[i].q_id].correctAnswers.includes(Number(responses[i].response)))){
           points = 0;
         }
