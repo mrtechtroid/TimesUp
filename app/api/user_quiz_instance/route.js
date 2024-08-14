@@ -15,7 +15,7 @@ export async function POST(request) {
   let team_info = data[0]?.team_info||[];
   for (let i = 0; i < team_info.length; i++) {
     for (let j = 0;j<team_info[i].players.length;j++){
-      if (team_info[i].players[j].name == body.name){
+      if (team_info[i].players[j].name == body.name || team_info[i].players[j].email == body.email){
         // console.log(user_responses)
           return NextResponse.json({"status":true,"team_name":team_info[i].name,"name":team_info[i].players[j].name})
         }

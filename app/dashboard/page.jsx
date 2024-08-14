@@ -223,6 +223,12 @@ function DashboardView({ db_fn,changeDBFN }) {
     ><QuizesView/></div></main></>;
   } else if (db_fn == "settings") {
     return <UserSettings/>;
+  } else if (db_fn == "upgrade") {
+    return <><div className="text-center">
+      <h1 className="text-lg font-semibold md:text-2xl">Upgrade to Pro</h1>
+      <div className="flex flex-col items-center justify-center"><span>Contact us at <a href="mailto:hello@mtt.one">hello@mtt.one</a> to request an account uprade.</span> </div>
+    </div>
+    <div/></>;
   }
 }
 export default function Dashboard() {
@@ -284,12 +290,12 @@ export default function Dashboard() {
               <CardHeader className="p-2 pt-0 md:p-4">
                 <CardTitle>Upgrade to Pro</CardTitle>
                 <CardDescription>
-                  Unlock all features and get unlimited access to our support
-                  team.
+                Unlock larger room sizes, priority support
+                support team and much more.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-2 pt-0 md:p-4 md:pt-0">
-                <Button size="sm" className="w-full">
+                <Button size="sm" className="w-full" onClick={function(){changeDBFN("upgrade")}}>
                   Upgrade
                 </Button>
               </CardContent>
@@ -346,12 +352,12 @@ export default function Dashboard() {
                   <CardHeader>
                     <CardTitle>Upgrade to Pro</CardTitle>
                     <CardDescription>
-                      Unlock all features and get unlimited access to our
+                      Unlock larger room sizes, and priority support
                       support team.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button size="sm" className="w-full">
+                    <Button size="sm" className="w-full" onClick={function(){changeDBFN("upgrade")}}>
                       Upgrade
                     </Button>
                   </CardContent>

@@ -518,14 +518,15 @@ const playQuiz = () => {
                       </button>
                     </div>
                   ))}
-                  {quiz_instance?.page?.type == "select_answer"&&quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-green-500">Correct!</span>}
+                  {quiz_instance?.page?.type == "select_answer"&&quiz_instance?.page?.correctAnswers?.includes(response) && <span className="text-green-500">Correct!</span>}
               </div>
               {quiz_instance?.page?.type == "type_answer" && (
                   <>
                     <div className="flex flex-col items-center justify-center">
                       <Input className="text-xl border-white" placeholder="Answer" value = {response} disabled />
-                      {quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-green-500">Correct!</span>}
-                      {/* {!quiz_instance?.page?.correct_answer?.includes(response) && <span className="text-red-500">Incorrect!</span>} */}
+                      <span className="text-green-200">Correct answer is/are "{quiz_instance?.page?.correctAnswers?.toString()}"</span>
+                      {quiz_instance?.page?.correctAnswers?.includes(response) && <span className="text-green-500">Correct!</span>}
+                      {!quiz_instance?.page?.correctAnswers?.includes(response) && <span className="text-red-500">Incorrect!</span>}
                     </div>
                   </>
                 )}

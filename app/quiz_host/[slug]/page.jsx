@@ -607,7 +607,7 @@ const hostQuiz = () => {
               {quiz_instance?.page?.type == "type_answer" && (
                   <>
                     <div className="flex flex-col items-center justify-center">
-                      <Input className="text-xl border-white" placeholder="Answer" value = {quiz_instance?.page?.correct_answer?.toString()} disabled />
+                      <Input className="text-xl border-white text-green-300" placeholder="Answer" value = {quiz_instance?.page?.correctAnswers?.toString()} disabled />
                     </div>
                   </>
                 )}

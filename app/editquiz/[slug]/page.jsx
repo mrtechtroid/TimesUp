@@ -389,7 +389,7 @@ const editQuiz = () => {
                   {enableTeams && 
                   (<><Button onClick={addTeam}>Add Team</Button>
                       <ScrollArea className="w-[50rem] whitespace-nowrap rounded-md border">
-                      <div className="flex w-max space-x-4 p-4 flex-grow flex-row" key={JSON.stringify(teams)}>
+                      <div className="flex w-max space-x-4 p-4 flex-grow flex-row">
                       
                       {teams.map((team, teamIndex) => (
                         <div className="flex flex-col m-4 border-2 border-gray-800 w-[300px] min-w-[300px] h-[500px] max-h-[500px] overflow-scroll"
